@@ -1,4 +1,4 @@
-import "./app.css";
+import "./App.css";
 import { CreateListingForm } from "./create-listing-form";
 import { Authenticator } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
