@@ -1,37 +1,48 @@
-import { useEffect, useState } from "react";
-import type { Schema } from "../amplify/data/resource";
-import { generateClient } from "aws-amplify/data";
-
-const client = generateClient<Schema>();
+import { useState } from "react";
+import { uploadData } from 'aws-amplify/storage';
 
 function App() {
-  const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
+  const [uploading, setUploading] = useState(false);
+  const [uploadedFile, setUploadedFile] = useState<string | null>(null);
 
-  useEffect(() => {
-    client.models.Todo.observeQuery().subscribe({
-      next: (data) => setTodos([...data.items]),
-    });
-  }, []);
+  async function handleFileUpload(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
 
-  function createTodo() {
-    client.models.Todo.create({ content: window.prompt("Todo content") });
+    setUploading(true);
+    try {
+      const result = await uploadData({
+        key: `uploads/${file.name}`,
+        data: file,
+        options: {
+          contentType: file.type,
+          accessLevel: 'artwork' // matches your storage.ts configuration
+        }
+      });
+      console.log('Upload successful:', result);
+      setUploadedFile(file.name);
+      alert('Image uploaded successfully!');
+    } catch (error) {
+      console.error('Upload failed:', error);
+      alert('Upload failed');
+    } finally {
+      setUploading(false);
+    }
   }
-
+  
   return (
     <main>
-      <h1>My todos</h1>
-      <button onClick={createTodo}>+ new</button>
-      <ul>
-        {todos.map((todo) => (
-          <li key={todo.id}>{todo.content}</li>
-        ))}
-      </ul>
-      <div>
-        🥳 App successfully hosted. Try creating a new todo.
-        <br />
-        <a href="https://docs.amplify.aws/react/start/quickstart/#make-frontend-updates">
-          Review next step of this tutorial.
-        </a>
+      <h1>Image Upload to S3</h1>
+      
+      <div style={{ marginBottom: '20px' }}>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleFileUpload}
+          disabled={uploading}
+        />
+        {uploading && <p>Uploading...</p>}
+        {uploadedFile && <p>Last uploaded file: {uploadedFile}</p>}
       </div>
     </main>
   );
