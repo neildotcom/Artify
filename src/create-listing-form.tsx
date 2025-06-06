@@ -21,7 +21,8 @@ export function CreateListingForm() {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
-    const { name, value, type, checked } = e.target;
+    const target = e.target as HTMLInputElement;
+    const { name, value, type, checked } = target;
     setForm((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
