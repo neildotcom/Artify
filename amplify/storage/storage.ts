@@ -1,15 +1,10 @@
 import { defineStorage } from '@aws-amplify/backend';
 
 export const storage = defineStorage({
-  name: 'listingimages',
-  configurations: {
-    artwork: {
-      permissions: {
-        read: ['public'],
-        write: ['public'],
-      },
+  access: (user) => ({
+    "uploads/": {
+      read: true,
+      write: true,
     },
-  },
+  }),
 });
-
-    
