@@ -173,5 +173,26 @@
       "nonModels": {}
     }
   },
+  "storage": {
+    "aws_region": "us-east-1",
+    "bucket_name": "amplify-d3cuju75t5qzm3-te-artworkuploadsbucket1f29-olzrlkz6g8eo",
+    "buckets": [
+      {
+        "name": "artworkUploads",
+        "bucket_name": "amplify-d3cuju75t5qzm3-te-artworkuploadsbucket1f29-olzrlkz6g8eo",
+        "aws_region": "us-east-1",
+        "paths": {
+          "uploads/{identityId}/*": {
+            "authenticated": [
+              "get",
+              "list",
+              "write",
+              "delete"
+            ]
+          }
+        }
+      }
+    ]
+  },
   "version": "1.3"
 }
