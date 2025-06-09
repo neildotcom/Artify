@@ -1,12 +1,10 @@
 import { defineStorage } from '@aws-amplify/backend';
 
 export const storage = defineStorage({
-  name: 'artworkStorage',
-  access: (auth) => ({
-    'uploads/': {
-      read: true,
-      write: true,
-      delete: true,
-    },
-  }),
+  name: 'artworkUploads',
+  access: (allow) => ({
+    'uploads/{identityId}/*': [
+      allow.authenticated.to(['read', 'write', 'delete'])
+    ],
+  })
 });
