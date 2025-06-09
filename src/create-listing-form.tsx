@@ -171,18 +171,6 @@ export function CreateListingForm() {
         <label>Tags</label>
         <input type="text" name="tags" value={form.tags} onChange={handleChange} placeholder="e.g., abstract, modern" />
       </div>
-      <div>
-        <label>
-          <input type="checkbox" name="isOriginal" checked={form.isOriginal} onChange={handleChange} />
-          Original Artwork
-        </label>
-      </div>
-      <div>
-        <label>
-          <input type="checkbox" name="isFramed" checked={form.isFramed} onChange={handleChange} />
-          Framed
-        </label>
-      </div>
       <div style={{ marginTop: 20 }}>
         <button type="submit" disabled={isSubmitting}>
           {isSubmitting ? "Submitting..." : "Create Listing"}
