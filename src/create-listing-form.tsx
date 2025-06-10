@@ -5,6 +5,8 @@ import { generateClient } from "aws-amplify/data";
 import type { Schema } from "../amplify/data/resource";
 import { useAuthenticator } from "@aws-amplify/ui-react";
 import { getCurrentUser } from "aws-amplify/auth";
+import { v4 as uuid } from 'uuid';
+
 
 const client = generateClient<Schema>();
 
@@ -106,7 +108,7 @@ export function CreateListingForm() {
 
       // Build and write metadata
       const payload: Partial<Schema["ArtworkListing"]["type"]> = {
-        userId: identityId,
+        listingId: uuid(), 
         status: "pending",
         imageS3Key: imageKey,
         title: form.title || undefined,

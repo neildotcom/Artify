@@ -3,6 +3,7 @@ import { a, defineData, type ClientSchema } from '@aws-amplify/backend';
 const schema = a.schema({
   ArtworkListing: a.model({
     userId: a.string(),        // required
+    listingId: a.string(),
     title: a.string(),         // optional by default
     description: a.string(),
     price: a.string(),
@@ -13,7 +14,9 @@ const schema = a.schema({
     tags: a.string(),
     imageS3Key: a.string(),
     status: a.string(),        // e.g., 'pending', 'completed'
-  }).authorization((allow) => [allow.authenticated()])
+  })
+  .identifier(['userId', 'listingId']) // Composite key
+  .authorization((allow) => [allow.authenticated()])
 });
 
 export type Schema = ClientSchema<typeof schema>;
