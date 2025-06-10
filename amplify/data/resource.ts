@@ -2,8 +2,8 @@ import { a, defineData, type ClientSchema } from '@aws-amplify/backend';
 
 const schema = a.schema({
   ArtworkListing: a.model({
-    userId: a.string(),        // required
-    listingId: a.string(),
+    userId: a.string().required(),        // required
+    listingId: a.id().required(),
     title: a.string(),         // optional by default
     description: a.string(),
     price: a.string(),
