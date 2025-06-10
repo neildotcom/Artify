@@ -36,6 +36,7 @@ export function CreateListingForm() {
   const [previews, setPreviews] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Handle text/select input changes
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -45,6 +46,7 @@ export function CreateListingForm() {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Handle file selection & preview
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     const files = Array.from(e.target.files);
@@ -55,16 +57,17 @@ export function CreateListingForm() {
     ]);
   };
 
+  // Remove preview & file
   const removeImage = (idx: number) => {
     URL.revokeObjectURL(previews[idx]);
     setImages((prev) => prev.filter((_, i) => i !== idx));
     setPreviews((prev) => prev.filter((_, i) => i !== idx));
   };
 
+  // Submit handler
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // 0) Ensure signed in
     if (!user) {
       alert("You must be signed in to create a listing.");
       return;
@@ -76,26 +79,22 @@ export function CreateListingForm() {
 
     setIsSubmitting(true);
     try {
-      // 1) Get the Cognito identityId for policy matching
+      // Get identityId for S3 path
       const { userId: identityId } = await getCurrentUser();
-      if (!identityId) {
-        throw new Error("Could not fetch identity ID.");
-      }
+      if (!identityId) throw new Error("Could not fetch identity ID.");
 
-      // 2) Upload first image to S3 under uploads/{identityId}/
+      // Upload first image
       const file = images[0];
       const uploadTask = uploadData({
         path: `uploads/${identityId}/${file.name}`,
         data: file,
         options: {
-          bucket: "artworkUploads",    // must match defineStorage name
-          contentType: file.type,      // helpful for correct object metadata
+          bucket: "artworkUploads",
+          contentType: file.type,
           onProgress: ({ transferredBytes, totalBytes }) => {
             if (totalBytes) {
               console.log(
-                `Upload progress: ${Math.round(
-                  (transferredBytes / totalBytes) * 100
-                )}%`
+                `Upload progress: ${Math.round((transferredBytes / totalBytes) * 100)}%`
               );
             }
           },
@@ -105,10 +104,10 @@ export function CreateListingForm() {
       console.log("S3 upload result:", result);
       const imageKey = result.path;
 
-      // 3) Build payload and write to DynamoDB
+      // Build and write metadata
       const payload: Partial<Schema["ArtworkListing"]["type"]> = {
         id: crypto.randomUUID(),
-        userId: identityId,           // matches your S3 access policy
+        userId: identityId,
         createdAt: new Date().toISOString(),
         status: "pending",
         imageS3Key: imageKey,
@@ -128,7 +127,7 @@ export function CreateListingForm() {
 
       alert("Listing submitted! (incomplete data allowed)");
 
-      // 4) Reset state
+      // Reset form
       setForm({
         title: "",
         description: "",
@@ -153,30 +152,15 @@ export function CreateListingForm() {
     <form onSubmit={handleSubmit} style={{ maxWidth: 600, margin: "0 auto" }}>
       <h2>Create Artwork Listing</h2>
 
+      {/* Image Upload */}
       <div>
         <label>Upload Images (up to 5):</label>
-        <input
-          type="file"
-          multiple
-          accept="image/*"
-          onChange={handleImageChange}
-        />
-        <div
-          style={{
-            display: "flex",
-            gap: "10px",
-            marginTop: "10px",
-            flexWrap: "wrap",
-          }}
-        >
+        <input type="file" multiple accept="image/*" onChange={handleImageChange} />
+        <div style={{ display: "flex", gap: "10px", marginTop: "10px", flexWrap: "wrap" }}>
           {previews.map((src, idx) => (
             <div key={idx} style={{ position: "relative" }}>
               <img src={src} alt={`preview-${idx}`} width={100} height={100} />
-              <button
-                type="button"
-                onClick={() => removeImage(idx)}
-                style={{ position: "absolute", top: 0, right: 0 }}
-              >
+              <button type="button" onClick={() => removeImage(idx)} style={{ position: "absolute", top: 0, right: 0 }}>
                 ❌
               </button>
             </div>
@@ -184,7 +168,54 @@ export function CreateListingForm() {
         </div>
       </div>
 
-      {/* ——— rest of form fields unchanged ——— */}
+      {/* Title */}
+      <div>
+        <label>Title</label>
+        <input type="text" name="title" value={form.title} onChange={handleChange} />
+      </div>
+      {/* Description */}
+      <div>
+        <label>Description</label>
+        <textarea name="description" value={form.description} onChange={handleChange} />
+      </div>
+      {/* Price */}
+      <div>
+        <label>Price (USD)</label>
+        <input type="number" name="price" value={form.price} onChange={handleChange} min="0" step="0.01" />
+      </div>
+      {/* Category */}
+      <div>
+        <label>Category</label>
+        <select name="category" value={form.category} onChange={handleChange}>
+          <option value="">Select</option>
+          {[
+            "Painting","Drawing","Photography","Digital Art","Sculpture",
+            "Printmaking","Mixed Media","Illustration","Abstract","Watercolor","Other",
+          ].map((cat) => (
+            <option key={cat} value={cat}>{cat}</option>
+          ))}
+        </select>
+      </div>
+      {/* Medium */}
+      <div>
+        <label>Medium</label>
+        <input type="text" name="medium" value={form.medium} onChange={handleChange} />
+      </div>
+      {/* Dimensions */}
+      <div>
+        <label>Dimensions</label>
+        <input type="text" name="dimensions" value={form.dimensions} onChange={handleChange} />
+      </div>
+      {/* Year */}
+      <div>
+        <label>Year Created</label>
+        <input type="number" name="year" value={form.year} onChange={handleChange} min="1900" max={new Date().getFullYear()} />
+      </div>
+      {/* Tags */}
+      <div>
+        <label>Tags</label>
+        <input type="text" name="tags" value={form.tags} onChange={handleChange} placeholder="e.g., abstract, modern" />
+      </div>
 
       <div style={{ marginTop: 20 }}>
         <button type="submit" disabled={isSubmitting}>
