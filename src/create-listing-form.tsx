@@ -86,7 +86,7 @@ export function CreateListingForm() {
       // Upload first image
       const file = images[0];
       const uploadTask = uploadData({
-        path: `uploads/${identityId}/${file.name}`,
+        path: `uploads/${images[0].name}`,
         data: file,
         options: {
           bucket: "artworkUploads",
