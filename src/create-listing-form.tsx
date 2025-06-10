@@ -106,9 +106,7 @@ export function CreateListingForm() {
 
       // Build and write metadata
       const payload: Partial<Schema["ArtworkListing"]["type"]> = {
-        id: crypto.randomUUID(),
         userId: identityId,
-        createdAt: new Date().toISOString(),
         status: "pending",
         imageS3Key: imageKey,
         title: form.title || undefined,
