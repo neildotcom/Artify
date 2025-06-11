@@ -27,17 +27,15 @@
   "data": {
     "url": "https://2geyf7quk5gwlotvxgrjcfgcay.appsync-api.us-east-1.amazonaws.com/graphql",
     "aws_region": "us-east-1",
-    "api_key": "da2-r5irjc4xvrep5ob6dr4tk2n3m4",
-    "default_authorization_type": "API_KEY",
+    "default_authorization_type": "AMAZON_COGNITO_USER_POOLS",
     "authorization_types": [
-      "AMAZON_COGNITO_USER_POOLS",
       "AWS_IAM"
     ],
     "model_introspection": {
       "version": 1,
       "models": {
-        "Todo": {
-          "name": "Todo",
+        "ArtworkListing": {
+          "name": "ArtworkListing",
           "fields": {
             "id": {
               "name": "id",
@@ -46,8 +44,78 @@
               "isRequired": true,
               "attributes": []
             },
-            "content": {
-              "name": "content",
+            "userId": {
+              "name": "userId",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "title": {
+              "name": "title",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "description": {
+              "name": "description",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "price": {
+              "name": "price",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "category": {
+              "name": "category",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "medium": {
+              "name": "medium",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "dimensions": {
+              "name": "dimensions",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "year": {
+              "name": "year",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "tags": {
+              "name": "tags",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "imageS3Key": {
+              "name": "imageS3Key",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "status": {
+              "name": "status",
               "isArray": false,
               "type": "String",
               "isRequired": false,
@@ -71,7 +139,7 @@
             }
           },
           "syncable": true,
-          "pluralName": "Todos",
+          "pluralName": "ArtworkListings",
           "attributes": [
             {
               "type": "model",
@@ -82,8 +150,7 @@
               "properties": {
                 "rules": [
                   {
-                    "allow": "public",
-                    "provider": "apiKey",
+                    "allow": "private",
                     "operations": [
                       "create",
                       "update",
@@ -105,6 +172,27 @@
       "enums": {},
       "nonModels": {}
     }
+  },
+  "storage": {
+    "aws_region": "us-east-1",
+    "bucket_name": "amplify-d3cuju75t5qzm3-te-artworkuploadsbucket1f29-olzrlkz6g8eo",
+    "buckets": [
+      {
+        "name": "artworkUploads",
+        "bucket_name": "amplify-d3cuju75t5qzm3-te-artworkuploadsbucket1f29-olzrlkz6g8eo",
+        "aws_region": "us-east-1",
+        "paths": {
+          "uploads/{identityId}/*": {
+            "authenticated": [
+              "get",
+              "list",
+              "write",
+              "delete"
+            ]
+          }
+        }
+      }
+    ]
   },
   "version": "1.3"
 }
