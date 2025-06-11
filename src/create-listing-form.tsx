@@ -67,7 +67,7 @@ export function CreateListingForm() {
   };
 
   // Submit handler
-  const handleSubmit = async (e: React.FormEvent) => {
+const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
 
   if (!user) {
@@ -81,11 +81,10 @@ export function CreateListingForm() {
 
   setIsSubmitting(true);
   try {
-    // Get identityId for S3 path
     const { userId } = await getCurrentUser();
     if (!userId) throw new Error("Could not fetch user ID.");
 
-    // Upload first image
+    // Upload image handling remains the same
     const file = images[0];
     const uploadTask = uploadData({
       path: `uploads/${userId}/${images[0].name}`,
@@ -103,12 +102,11 @@ export function CreateListingForm() {
       },
     });
     const result = await uploadTask.result;
-    console.log("S3 upload result:", result);
     const imageKey = result.path;
 
-    // Build and write metadata
-    const payload: Schema["ArtworkListing"]["create"] = {
-      userId: userId,  // Include userId from the composite key
+    // Modified create operation
+    const payload = {
+      userId: userId,
       listingId: uuid(),
       status: "pending",
       imageS3Key: imageKey,
@@ -123,12 +121,13 @@ export function CreateListingForm() {
     };
     console.log("Creating listing payload:", payload);
 
+    // Use the correct method for Gen 2
     const dbResult = await client.models.ArtworkListing.create(payload);
     console.log("DynamoDB create result:", dbResult);
 
     alert("Listing submitted successfully!");
 
-    // Reset form
+    // Form reset remains the same
     setForm({
       title: "",
       description: "",
@@ -148,6 +147,7 @@ export function CreateListingForm() {
     setIsSubmitting(false);
   }
 };
+
 
 
   return (
