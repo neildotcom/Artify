@@ -11,7 +11,7 @@ function App() {
         <main className="container mx-auto py-10">
           <div className="flex justify-between items-center mb-6">
             <div>
-              <h1 className="text-3xl font-bold">Create Artwork Listing</h1>
+              <h1 className="text-3xl font-bold">Artify</h1>
               <p className="text-sm text-gray-600 mt-1">
                 Signed in as: <strong>{user?.username}</strong>
               </p>
@@ -25,7 +25,7 @@ function App() {
           </div>
           <CreateListingForm />
         </main>
-      )}
+      )} 
     </Authenticator>
   );
 }
