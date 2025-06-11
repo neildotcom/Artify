@@ -68,85 +68,87 @@ export function CreateListingForm() {
 
   // Submit handler
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!user) {
-      alert("You must be signed in to create a listing.");
-      return;
-    }
-    if (images.length === 0) {
-      alert("Please upload at least one image.");
-      return;
-    }
+  if (!user) {
+    alert("You must be signed in to create a listing.");
+    return;
+  }
+  if (images.length === 0) {
+    alert("Please upload at least one image.");
+    return;
+  }
 
-    setIsSubmitting(true);
-    try {
-      // Get identityId for S3 path
-      const { userId: identityId } = await getCurrentUser();
-      if (!identityId) throw new Error("Could not fetch identity ID.");
+  setIsSubmitting(true);
+  try {
+    // Get identityId for S3 path
+    const { userId } = await getCurrentUser();
+    if (!userId) throw new Error("Could not fetch user ID.");
 
-      // Upload first image
-      const file = images[0];
-      const uploadTask = uploadData({
-        path: `uploads/${identityId}/${images[0].name}`,
-        data: file,
-        options: {
-          bucket: "artworkUploads",
-          contentType: file.type,
-          onProgress: ({ transferredBytes, totalBytes }) => {
-            if (totalBytes) {
-              console.log(
-                `Upload progress: ${Math.round((transferredBytes / totalBytes) * 100)}%`
-              );
-            }
-          },
+    // Upload first image
+    const file = images[0];
+    const uploadTask = uploadData({
+      path: `uploads/${userId}/${images[0].name}`,
+      data: file,
+      options: {
+        bucket: "artworkUploads",
+        contentType: file.type,
+        onProgress: ({ transferredBytes, totalBytes }) => {
+          if (totalBytes) {
+            console.log(
+              `Upload progress: ${Math.round((transferredBytes / totalBytes) * 100)}%`
+            );
+          }
         },
-      });
-      const result = await uploadTask.result;
-      console.log("S3 upload result:", result);
-      const imageKey = result.path;
+      },
+    });
+    const result = await uploadTask.result;
+    console.log("S3 upload result:", result);
+    const imageKey = result.path;
 
-      // Build and write metadata
-      const payload: Partial<Schema["ArtworkListing"]["type"]> = {
-        listingId: uuid(), 
-        status: "pending",
-        imageS3Key: imageKey,
-        title: form.title || undefined,
-        description: form.description || undefined,
-        price: form.price || undefined,
-        category: form.category || undefined,
-        medium: form.medium || undefined,
-        dimensions: form.dimensions || undefined,
-        year: form.year || undefined,
-        tags: form.tags || undefined,
-      };
-      console.log("Creating listing payload:", payload);
+    // Build and write metadata
+    const payload: Schema["ArtworkListing"]["create"] = {
+      userId: userId,  // Include userId from the composite key
+      listingId: uuid(),
+      status: "pending",
+      imageS3Key: imageKey,
+      title: form.title || "",
+      description: form.description || "",
+      price: form.price || "",
+      category: form.category || "",
+      medium: form.medium || "",
+      dimensions: form.dimensions || "",
+      year: form.year || "",
+      tags: form.tags || "",
+    };
+    console.log("Creating listing payload:", payload);
 
-      const dbResult = await client.models.ArtworkListing.create(payload);
-      console.log("DynamoDB create result:", dbResult);
+    const dbResult = await client.models.ArtworkListing.create(payload);
+    console.log("DynamoDB create result:", dbResult);
 
-      alert("Listing submitted! (incomplete data allowed)");
+    alert("Listing submitted successfully!");
 
-      // Reset form
-      setForm({
-        title: "",
-        description: "",
-        price: "",
-        category: "",
-        medium: "",
-        dimensions: "",
-        year: new Date().getFullYear().toString(),
-        tags: "",
-      });
-      setImages([]);
-      setPreviews([]);
-    } catch (err) {
-      console.error("Error in handleSubmit:", err);
-      alert("Something went wrong. Please check the console.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    // Reset form
+    setForm({
+      title: "",
+      description: "",
+      price: "",
+      category: "",
+      medium: "",
+      dimensions: "",
+      year: new Date().getFullYear().toString(),
+      tags: "",
+    });
+    setImages([]);
+    setPreviews([]);
+  } catch (err) {
+    console.error("Error in handleSubmit:", err);
+    alert("Something went wrong. Please check the console.");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
 
   return (
     <form onSubmit={handleSubmit} style={{ maxWidth: 600, margin: "0 auto" }}>
