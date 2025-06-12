@@ -156,7 +156,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
       {/* Image Upload */}
       <div>
-        <label>Upload Images (up to 5):</label>
+        <label>Upload Artwork):</label>
         <input type="file" multiple accept="image/*" onChange={handleImageChange} />
         <div style={{ display: "flex", gap: "10px", marginTop: "10px", flexWrap: "wrap" }}>
           {previews.map((src, idx) => (
