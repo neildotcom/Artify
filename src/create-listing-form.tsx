@@ -8,10 +8,11 @@ import { getCurrentUser } from "aws-amplify/auth";
 import { v4 as uuid } from "uuid";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Upload, X } from "lucide-react";
 
 const client = generateClient<Schema>();
 
@@ -26,150 +27,130 @@ interface FormState {
 export function CreateListingForm() {
   const { user } = useAuthenticator((ctx) => [ctx.user]);
   const [form, setForm] = useState<FormState>({
-    title: "",
-    description: "",
-    price: "",
-    category: "",
-    tags: "",
+    title: "", description: "", price: "", category: "", tags: "",
   });
   const [images, setImages] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setForm(prev => ({ ...prev, [name]: value }));
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     const files = Array.from(e.target.files);
-    setImages((prev) => [...prev, ...files]);
-    setPreviews((prev) => [
-      ...prev,
-      ...files.map((file) => URL.createObjectURL(file)),
-    ]);
+    setImages(prev => [...prev, ...files]);
+    setPreviews(prev => [...prev, ...files.map(f => URL.createObjectURL(f))]);
   };
 
   const removeImage = (idx: number) => {
     URL.revokeObjectURL(previews[idx]);
-    setImages((prev) => prev.filter((_, i) => i !== idx));
-    setPreviews((prev) => prev.filter((_, i) => i !== idx));
+    setImages(prev => prev.filter((_, i) => i !== idx));
+    setPreviews(prev => prev.filter((_, i) => i !== idx));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return alert("You must be signed in to create a listing.");
-    if (images.length === 0) return alert("Please upload at least one image.");
+    if (!user) return alert("You must be signed in.");
+    if (!images.length) return alert("Please upload at least one image.");
 
     setIsSubmitting(true);
     try {
       const { userId } = await getCurrentUser();
-      if (!userId) throw new Error("Could not fetch user ID.");
+      if (!userId) throw new Error("Missing user ID.");
 
       const file = images[0];
-      const uploadTask = uploadData({
+      const { path: imageKey } = await uploadData({
         path: `uploads/${userId}/${file.name}`,
         data: file,
-        options: {
-          bucket: "artworkUploads",
-          contentType: file.type,
-        },
-      });
-      const result = await uploadTask.result;
+        options: { bucket: "artworkUploads", contentType: file.type },
+      }).result;
 
-      const payload = {
-        userId,
-        listingId: uuid(),
-        status: "pending",
-        imageS3Key: result.path,
-        ...form,
-      };
-
-      const dbResult = await client.models.ArtworkListing.create(payload);
-      console.log("DynamoDB create result:", dbResult);
+      const payload = { userId, listingId: uuid(), status: "pending", imageS3Key: imageKey, ...form };
+      await client.models.ArtworkListing.create(payload);
       alert("Listing submitted successfully!");
-
       setForm({ title: "", description: "", price: "", category: "", tags: "" });
-      setImages([]);
-      setPreviews([]);
+      setImages([]); setPreviews([]);
     } catch (err) {
-      console.error("Error in handleSubmit:", err);
-      alert("Something went wrong. Please check the console.");
+      console.error(err);
+      alert("Error submitting listing.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <Card className="max-w-xl mx-auto mt-10">
-      <CardContent className="space-y-4 py-6">
-        <h2 className="text-2xl font-bold">Create Artwork Listing</h2>
+    <form onSubmit={handleSubmit} className="space-y-6 max-w-lg mx-auto mt-10">
 
-        <div>
-          <Label>Upload Artwork</Label>
-          <Input type="file" multiple accept="image/*" onChange={handleImageChange} />
-          <div className="flex flex-wrap gap-4 mt-2">
+      <Card>
+        <CardContent className="space-y-4 pt-6">
+          <h2 className="text-lg font-semibold text-left">Artwork Images</h2>
+
+          <div className="grid grid-cols-3 gap-4">
             {previews.map((src, idx) => (
-              <div key={idx} className="relative w-24 h-24">
-                <img src={src} alt={`preview-${idx}`} className="w-full h-full object-cover rounded" />
-                <Button
+              <div key={idx} className="relative aspect-square rounded-md overflow-hidden border">
+                <img src={src} className="w-full h-full object-cover" />
+                <button
                   type="button"
-                  size="sm"
-                  variant="destructive"
-                  className="absolute top-0 right-0"
                   onClick={() => removeImage(idx)}
+                  className="absolute top-2 right-2 bg-black/50 text-white p-1 rounded-full"
                 >
-                  ❌
-                </Button>
+                  <X className="h-4 w-4" />
+                </button>
               </div>
             ))}
+
+            {previews.length < 5 && (
+              <label className="flex flex-col items-center justify-center border-2 border-dashed border-muted rounded-md aspect-square cursor-pointer hover:bg-muted/50 transition-colors">
+                <Upload className="h-8 w-8 mb-2 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">Upload Image</span>
+                <Input type="file" accept="image/*" onChange={handleImageChange} className="absolute inset-0 opacity-0 cursor-pointer" />
+              </label>
+            )}
           </div>
-        </div>
 
-        <div className="space-y-2">
-          <Label>Title</Label>
-          <Input type="text" name="title" value={form.title} onChange={handleChange} />
-        </div>
+        </CardContent>
+      </Card>
 
-        <div className="space-y-2">
-          <Label>Description</Label>
-          <Textarea name="description" value={form.description} onChange={handleChange} />
-        </div>
+      <Card>
+        <CardContent className="space-y-4 pt-6">
+          <h2 className="text-lg font-semibold text-left">Artwork Details</h2>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-left block" htmlFor="title">Title</Label>
+              <Input id="title" name="title" value={form.title} onChange={handleChange} />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-left block" htmlFor="description">Description</Label>
+              <Textarea id="description" name="description" value={form.description} onChange={handleChange} />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-left block" htmlFor="price">Price (USD)</Label>
+                <Input id="price" name="price" type="number" value={form.price} onChange={handleChange} min="0" step="0.01" />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-left block" htmlFor="category">Category</Label>
+                <Input id="category" name="category" value={form.category} onChange={handleChange} />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-left block" htmlFor="tags">Tags</Label>
+              <Input id="tags" name="tags" value={form.tags} onChange={handleChange} />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-        <div className="space-y-2">
-          <Label>Price (USD)</Label>
-          <Input type="number" name="price" value={form.price} onChange={handleChange} min="0" step="0.01" />
-        </div>
-
-        <div className="space-y-2">
-          <Label>Category</Label>
-          <Input
-            type="text"
-            name="category"
-            value={form.category}
-            onChange={handleChange}
-            placeholder="e.g., abstract, digital"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label>Tags</Label>
-          <Input
-            type="text"
-            name="tags"
-            value={form.tags}
-            onChange={handleChange}
-            placeholder="e.g., ethereal, portrait"
-          />
-        </div>
-
-        <Button type="submit" disabled={isSubmitting} className="w-full mt-4">
-          {isSubmitting ? "Submitting..." : "Create Listing"}
+      <div className="flex justify-end gap-4">
+        <Button type="button" variant="outline" onClick={() => setForm({ title: "", description: "", price: "", category: "", tags: "" })}>
+          Cancel
         </Button>
-      </CardContent>
-    </Card>
+        <Button type="submit" disabled={isSubmitting}>{isSubmitting ? "Submitting..." : "Create Listing"}</Button>
+      </div>
+
+    </form>
   );
 }

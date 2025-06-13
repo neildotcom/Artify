@@ -3,31 +3,40 @@ import { CreateListingForm } from "./create-listing-form";
 import { Authenticator } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
 import "./lib/amplifyClient";
-import './index.css'; // or './app.css'
-
+import "./index.css";
 
 function App() {
   return (
     <Authenticator>
       {({ signOut, user }) => (
-        <main className="container mx-auto py-10">
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h1 className="text-3xl font-bold">Artify</h1>
-              <p className="text-sm text-gray-600 mt-1">
-                Signed in as: <strong>{user?.username}</strong>
-              </p>
+        <>
+          {/* Top Nav */}
+          <header className="w-full border-b bg-white shadow-sm px-6 py-4 flex justify-between items-center">
+            <div className="flex items-center gap-6">
+              <h1 className="text-2xl font-bold text-primary">Artify</h1>
+              <nav className="hidden md:flex gap-4 text-sm text-muted-foreground">
+                <a href="#" className="hover:text-primary">Home</a>
+                <a href="#" className="hover:text-primary">Browse</a>
+                <a href="#" className="hover:text-primary">Sell</a>
+              </nav>
             </div>
-            <button
-              onClick={signOut}
-              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-            >
-              Sign Out
-            </button>
-          </div>
-          <CreateListingForm />
-        </main>
-      )} 
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-muted-foreground">Hi, {user?.username}</span>
+              <button
+                onClick={signOut}
+                className="bg-gray-100 border px-3 py-1 rounded text-sm hover:bg-gray-200"
+              >
+                Sign Out
+              </button>
+            </div>
+          </header>
+
+          {/* Page Content */}
+          <main className="px-6 py-10">
+            <CreateListingForm />
+          </main>
+        </>
+      )}
     </Authenticator>
   );
 }
