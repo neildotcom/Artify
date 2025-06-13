@@ -3,6 +3,8 @@ import { CreateListingForm } from "./create-listing-form";
 import { Authenticator } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
 import "./lib/amplifyClient";
+import './index.css'; // or './app.css'
+
 
 function App() {
   return (
