@@ -174,20 +174,18 @@ const handleSubmit = async (e: React.FormEvent) => {
       {/* Category */}
       <div>
         <label>Category</label>
-        <select name="category" value={form.category} onChange={handleChange}>
-          <option value="">Select</option>
-          {[
-            "Painting","Drawing","Photography","Digital Art","Sculpture",
-            "Printmaking","Mixed Media","Illustration","Abstract","Watercolor","Other",
-          ].map((cat) => (
-            <option key={cat} value={cat}>{cat}</option>
-          ))}
-        </select>
+        <input
+          type="text"
+          name="category"
+          value={form.category}
+          onChange={handleChange}
+          placeholder="e.g., abstract, digital"
+        />
       </div>
       {/* Tags */}
       <div>
         <label>Tags</label>
-        <input type="text" name="tags" value={form.tags} onChange={handleChange} placeholder="e.g., abstract, modern" />
+        <input type="text" name="tags" value={form.tags} onChange={handleChange} placeholder="e.g., ethereal, portrait" />
       </div>
 
       <div style={{ marginTop: 20 }}>
