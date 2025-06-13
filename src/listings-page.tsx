@@ -43,7 +43,7 @@ export function ListingsPage() {
           {listings.map(listing => (
             <Card key={listing.listingId} className="overflow-hidden">
               <img
-                src={`https://amplify-d3cuju75t5qzm3-te-artworkuploadsbucket1f29-3ycsnwmsg6pb.s3.amazonaws.com/${listing.imageS3Key}`}
+                src={`https://amplify-d3cuju75t5qzm3-te-artworkuploadsbucket1f29-3ycsnwmsg6pb.s3.us-east-1.amazonaws.com/${listing.imageS3Key}`}
                 alt={listing.title || "Artwork image"}
                 className="w-full h-48 object-cover rounded"
               />
