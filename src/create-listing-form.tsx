@@ -15,9 +15,6 @@ interface FormState {
   description: string;
   price: string;
   category: string;
-  medium: string;
-  dimensions: string;
-  year: string;
   tags: string;
 }
 
@@ -29,9 +26,6 @@ export function CreateListingForm() {
     description: "",
     price: "",
     category: "",
-    medium: "",
-    dimensions: "",
-    year: new Date().getFullYear().toString(),
     tags: "",
   });
   const [images, setImages] = useState<File[]>([]);
@@ -114,9 +108,6 @@ const handleSubmit = async (e: React.FormEvent) => {
       description: form.description || "",
       price: form.price || "",
       category: form.category || "",
-      medium: form.medium || "",
-      dimensions: form.dimensions || "",
-      year: form.year || "",
       tags: form.tags || "",
     };
     console.log("Creating listing payload:", payload);
@@ -133,9 +124,6 @@ const handleSubmit = async (e: React.FormEvent) => {
       description: "",
       price: "",
       category: "",
-      medium: "",
-      dimensions: "",
-      year: new Date().getFullYear().toString(),
       tags: "",
     });
     setImages([]);
@@ -148,15 +136,13 @@ const handleSubmit = async (e: React.FormEvent) => {
   }
 };
 
-
-
   return (
     <form onSubmit={handleSubmit} style={{ maxWidth: 600, margin: "0 auto" }}>
       <h2>Create Artwork Listing</h2>
 
       {/* Image Upload */}
       <div>
-        <label>Upload Images (up to 5):</label>
+        <label>Upload Artwork):</label>
         <input type="file" multiple accept="image/*" onChange={handleImageChange} />
         <div style={{ display: "flex", gap: "10px", marginTop: "10px", flexWrap: "wrap" }}>
           {previews.map((src, idx) => (
@@ -188,35 +174,18 @@ const handleSubmit = async (e: React.FormEvent) => {
       {/* Category */}
       <div>
         <label>Category</label>
-        <select name="category" value={form.category} onChange={handleChange}>
-          <option value="">Select</option>
-          {[
-            "Painting","Drawing","Photography","Digital Art","Sculpture",
-            "Printmaking","Mixed Media","Illustration","Abstract","Watercolor","Other",
-          ].map((cat) => (
-            <option key={cat} value={cat}>{cat}</option>
-          ))}
-        </select>
-      </div>
-      {/* Medium */}
-      <div>
-        <label>Medium</label>
-        <input type="text" name="medium" value={form.medium} onChange={handleChange} />
-      </div>
-      {/* Dimensions */}
-      <div>
-        <label>Dimensions</label>
-        <input type="text" name="dimensions" value={form.dimensions} onChange={handleChange} />
-      </div>
-      {/* Year */}
-      <div>
-        <label>Year Created</label>
-        <input type="number" name="year" value={form.year} onChange={handleChange} min="1900" max={new Date().getFullYear()} />
+        <input
+          type="text"
+          name="category"
+          value={form.category}
+          onChange={handleChange}
+          placeholder="e.g., abstract, digital"
+        />
       </div>
       {/* Tags */}
       <div>
         <label>Tags</label>
-        <input type="text" name="tags" value={form.tags} onChange={handleChange} placeholder="e.g., abstract, modern" />
+        <input type="text" name="tags" value={form.tags} onChange={handleChange} placeholder="e.g., ethereal, portrait" />
       </div>
 
       <div style={{ marginTop: 20 }}>

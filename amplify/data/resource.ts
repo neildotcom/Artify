@@ -2,20 +2,20 @@ import { a, defineData, type ClientSchema } from '@aws-amplify/backend';
 
 const schema = a.schema({
   ArtworkListing: a.model({
-    userId: a.string().required(),        // required
+    userId: a.string().required(),
     listingId: a.id().required(),
-    title: a.string(),         // optional by default
+    title: a.string(),
     description: a.string(),
     price: a.string(),
     category: a.string(),
-    medium: a.string(),
-    dimensions: a.string(),
-    year: a.string(),
     tags: a.string(),
     imageS3Key: a.string(),
-    status: a.string(),        // e.g., 'pending', 'completed'
+    status: a.string(),
   })
-  .identifier(['userId', 'listingId']) // Composite key
+  .identifier(['userId', 'listingId'])
+  .secondaryIndexes((index) => [
+    index('imageS3Key')  // 👈 Simple GSI definition
+  ])
   .authorization((allow) => [allow.authenticated()])
 });
 
