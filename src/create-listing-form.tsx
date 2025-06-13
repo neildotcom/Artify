@@ -15,9 +15,6 @@ interface FormState {
   description: string;
   price: string;
   category: string;
-  medium: string;
-  dimensions: string;
-  year: string;
   tags: string;
 }
 
@@ -29,9 +26,6 @@ export function CreateListingForm() {
     description: "",
     price: "",
     category: "",
-    medium: "",
-    dimensions: "",
-    year: new Date().getFullYear().toString(),
     tags: "",
   });
   const [images, setImages] = useState<File[]>([]);
@@ -114,9 +108,6 @@ const handleSubmit = async (e: React.FormEvent) => {
       description: form.description || "",
       price: form.price || "",
       category: form.category || "",
-      medium: form.medium || "",
-      dimensions: form.dimensions || "",
-      year: form.year || "",
       tags: form.tags || "",
     };
     console.log("Creating listing payload:", payload);
@@ -133,9 +124,6 @@ const handleSubmit = async (e: React.FormEvent) => {
       description: "",
       price: "",
       category: "",
-      medium: "",
-      dimensions: "",
-      year: new Date().getFullYear().toString(),
       tags: "",
     });
     setImages([]);
@@ -147,8 +135,6 @@ const handleSubmit = async (e: React.FormEvent) => {
     setIsSubmitting(false);
   }
 };
-
-
 
   return (
     <form onSubmit={handleSubmit} style={{ maxWidth: 600, margin: "0 auto" }}>
@@ -197,21 +183,6 @@ const handleSubmit = async (e: React.FormEvent) => {
             <option key={cat} value={cat}>{cat}</option>
           ))}
         </select>
-      </div>
-      {/* Medium */}
-      <div>
-        <label>Medium</label>
-        <input type="text" name="medium" value={form.medium} onChange={handleChange} />
-      </div>
-      {/* Dimensions */}
-      <div>
-        <label>Dimensions</label>
-        <input type="text" name="dimensions" value={form.dimensions} onChange={handleChange} />
-      </div>
-      {/* Year */}
-      <div>
-        <label>Year Created</label>
-        <input type="number" name="year" value={form.year} onChange={handleChange} min="1900" max={new Date().getFullYear()} />
       </div>
       {/* Tags */}
       <div>
