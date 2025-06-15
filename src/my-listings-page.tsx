@@ -28,11 +28,24 @@ export function MyListingsPage() {
 
         const enrichedListings: ListingWithUrl[] = await Promise.all(
           result.data.map(async (listing) => {
-            const moderationLabels = Array.isArray(listing.moderationLabels)
-              ? listing.moderationLabels as { Label: string; Confidence: number }[]
-              : undefined
+            const moderationLabels = (() => {
+              if (Array.isArray(listing.moderationLabels)) {
+                return listing.moderationLabels as { Label: string; Confidence: number }[]
+              }
+              if (typeof listing.moderationLabels === "string") {
+                try {
+                  const parsed = JSON.parse(listing.moderationLabels)
+                  return Array.isArray(parsed) ? parsed : undefined
+                } catch {
+                  return undefined
+                }
+              }
+              return undefined
+            })()
 
-            if (!listing.imageS3Key) return { ...listing, moderationLabels }
+            if (!listing.imageS3Key || listing.status === "flagged") {
+              return { ...listing, moderationLabels }
+            }
 
             try {
               const { url } = await getUrl({ path: listing.imageS3Key })
@@ -69,26 +82,14 @@ export function MyListingsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {listings.map((listing) => (
             <Card key={listing.listingId} className="overflow-hidden relative">
-              {listing.status === "flagged" ? (
-                <div className="relative">
-                  <img
-                    src={listing.signedUrl || ""}
-                    alt={listing.title || "Artwork image"}
-                    className="w-full h-48 object-cover blur-sm"
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-red-700 font-bold bg-white px-3 py-1 rounded">
-                      Flagged by Moderation
-                    </span>
-                  </div>
-                </div>
-              ) : (
+              {listing.status !== "flagged" && (
                 <img
                   src={listing.signedUrl || ""}
                   alt={listing.title || "Artwork image"}
                   className="w-full h-48 object-cover"
                 />
               )}
+
               <CardContent className="p-4 space-y-2">
                 <h2 className="text-lg font-semibold">{listing.title}</h2>
                 <p className="text-sm text-muted-foreground line-clamp-2">
@@ -105,14 +106,18 @@ export function MyListingsPage() {
                     ))}
                   </div>
                 )}
-                {listing.status === "flagged" && listing.moderationLabels && (
-                  <div className="mt-2 text-xs text-red-600">
-                    <p className="font-semibold">Flagged Labels:</p>
-                    <ul className="list-disc list-inside">
-                      {listing.moderationLabels.map((label, i) => (
-                        <li key={i}>{label.Label} ({Math.round(label.Confidence)}%)</li>
-                      ))}
-                    </ul>
+                {listing.status === "flagged" && (
+                  <div className="mt-2 text-sm text-red-600 border border-red-500 p-2 rounded">
+                    <p className="font-semibold mb-1">⚠️ Flagged by Moderation</p>
+                    {listing.moderationLabels?.length ? (
+                      <ul className="list-disc list-inside text-xs">
+                        {listing.moderationLabels.map((label, i) => (
+                          <li key={i}>{label.Label} ({Math.round(label.Confidence)}%)</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-xs italic">No labels provided.</p>
+                    )}
                   </div>
                 )}
               </CardContent>
