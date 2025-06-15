@@ -1,4 +1,4 @@
-// src/components/ListingsPage.tsx
+// src/components/ListingsPage.tsx test
 import { useEffect, useState } from "react"
 import { generateClient } from "aws-amplify/data"
 import { getUrl } from "@aws-amplify/storage"
