@@ -11,6 +11,7 @@ const schema = a.schema({
     tags: a.string(),
     imageS3Key: a.string(),
     status: a.string(),
+    moderationLabels: a.json(), 
   })
   .identifier(['userId', 'listingId'])
   .secondaryIndexes((index) => [

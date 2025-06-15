@@ -28,12 +28,17 @@ export function MyListingsPage() {
 
         const enrichedListings: ListingWithUrl[] = await Promise.all(
           result.data.map(async (listing) => {
-            if (!listing.imageS3Key) return listing
+            const moderationLabels = Array.isArray(listing.moderationLabels)
+              ? listing.moderationLabels as { Label: string; Confidence: number }[]
+              : undefined
+
+            if (!listing.imageS3Key) return { ...listing, moderationLabels }
+
             try {
               const { url } = await getUrl({ path: listing.imageS3Key })
-              return { ...listing, signedUrl: url.toString() }
+              return { ...listing, signedUrl: url.toString(), moderationLabels }
             } catch {
-              return listing
+              return { ...listing, moderationLabels }
             }
           })
         )
@@ -45,6 +50,7 @@ export function MyListingsPage() {
         setLoading(false)
       }
     }
+
     fetchListings()
   }, [user?.userId])
 
